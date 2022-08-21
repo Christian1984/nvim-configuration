@@ -48,7 +48,7 @@ vim.opt.shortmess:append "c"
 vim.cmd "set whichwrap+=<,>,[,],h,l"
 vim.cmd [[set iskeyword+=-]]
 
-vim.api.nvim_exec("language en_US", true)
+vim.api.nvim_exec("language en_US.UTF-8", true) -- extend with UTF-8 to properly copy umlauts to system clipboard
 
 -- vim.opt.autoindent = true
 -- vim.opt.smartindent = true
