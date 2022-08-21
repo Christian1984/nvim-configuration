@@ -18,3 +18,15 @@ brew install --cask font-victor-mono-nerd-font
 ```
 
 Then set it as the active font in iTerm 2 and enable font ligatures.
+
+## Important Bindings
+
+`<C-h>`, `<C-j>`, `<C-k>`, `<C-l>`: navigate splits 
+`<A-Up, Left, Right, Down>`: resize splits 
+`<leader>h`, `<leader>l`: navigate buffers
+`gl`: lsp diagnostics
+
+## Important Commands
+
+`LspInstallInfo`: install lsp servers
+`LspInfo`: see currently attached lsp servers
