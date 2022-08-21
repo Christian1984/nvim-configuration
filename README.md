@@ -25,6 +25,7 @@ Then set it as the active font in iTerm 2 and enable font ligatures.
 `<A-Up, Left, Right, Down>`: resize splits 
 `<leader>h`, `<leader>l`: navigate buffers
 `gl`: lsp diagnostics
+`K`: hover and get information about symbol (vs. `<C-k>`, check `handlers.lua`)
 
 ## Important Commands
 
