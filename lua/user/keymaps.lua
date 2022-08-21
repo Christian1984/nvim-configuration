@@ -32,8 +32,8 @@ keymap("n", "<A-Left>", ":vertical resize -2<CR>", opts)
 keymap("n", "<A-Right>", ":vertical resize +2<CR>", opts)
 
 -- Navigate buffers
-keymap("n", "<C-l>", ":bnext<CR>", opts)     -- changed to <C-*> to keept default <S-*> behaviour
-keymap("n", "<C-h>", ":bprevious<CR>", opts) -- changed to <C-*> to keept default <S-*> behaviour
+keymap("n", "<leader>l", ":bnext<CR>", opts)     -- changed to <C-*> to keept default <S-*> behaviour
+keymap("n", "<leader>h", ":bprevious<CR>", opts) -- changed to <C-*> to keept default <S-*> behaviour
 
 -- Insert --
 -- Press jk fast to enter
