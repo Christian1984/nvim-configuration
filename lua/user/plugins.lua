@@ -23,7 +23,7 @@ vim.cmd [[
   augroup end
 ]]
 
--- Use a protected call so we don't error out on first use
+-- Use a protected call so we don"t error out on first use
 local status_ok, packer = pcall(require, "packer")
 if not status_ok then
   return
@@ -45,9 +45,13 @@ return packer.startup(function(use)
   use "nvim-lua/popup.nvim" -- An implementation of the Popup API from vim in Neovim
   use "nvim-lua/plenary.nvim" -- Useful lua functions used ny lots of plugins
 
+  -- Startup
+  use "lewis6991/impatient.nvim"
+  use "nathom/filetype.nvim"
+
   -- Colorschemes
-  -- use "lunarvim/colorschemes" -- A bunch of colorschemes you can try out
-  -- use "lunarvim/darkplus.nvim"
+  use "lunarvim/colorschemes" -- A bunch of colorschemes you can try out
+  use "lunarvim/darkplus.nvim"
   use "folke/tokyonight.nvim"
 
   -- cmp plugins
@@ -67,11 +71,20 @@ return packer.startup(function(use)
   use "neovim/nvim-lspconfig" -- enable LSP
   use "williamboman/nvim-lsp-installer" -- simple to use language server installer
 
-  -- airline
-  -- use("nvim-lualine/lualine.nvim")
-  use("itchyny/lightline.vim")
-  -- use "vim-airline/vim-airline"
-  -- use "akinsho/bufferline.nvim"
+  -- Telescope
+  use "nvim-telescope/telescope.nvim"
+
+  -- Treesitter
+  use {"nvim-treesitter/nvim-treesitter", run = ":TSUpdate"}
+  use "p00f/nvim-ts-rainbow"
+  -- use "nvim-treesitter/playground"
+
+  -- Dashboard, Lualine, Bufferline
+  -- use("glepnir/dashboard-nvim")
+  use {"nvim-lualine/lualine.nvim", requires = { "kyazdani42/nvim-web-devicons", opt = true}}
+  use {"akinsho/bufferline.nvim", tag = "v2.*", requires = "kyazdani42/nvim-web-devicons"}
+
+  use("petertriho/nvim-scrollbar")
 
   -- Automatically set up your configuration after cloning packer.nvim
   -- Put this at the end after all plugins
