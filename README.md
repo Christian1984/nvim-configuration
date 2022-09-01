@@ -25,9 +25,13 @@ Then set it as the active font in iTerm 2 or Windows Terminal App and enable fon
 
 Install [ripgrep](https://github.com/BurntSushi/ripgrep) to have .gitignore respected and overall much better experience.
 
-## Tree Sitter and Windows
+## TreeSitter and Windows
 
 Installing nvim-treesitter under Windows gave me quite a bit of a headache. Here's what worked for me:
+
+- Install MinGW-x64 and add the `bin/` to PATH
+
+or
 
 - Install Visual Studio 2019 `x64 Native Tools Command Prompt for VS 2019` and run them.
 - In the prompt that appears, navigate to the `[nvim-dir]\bin` and run `nvim-qt.exe`.
@@ -59,7 +63,6 @@ Installing nvim-treesitter under Windows gave me quite a bit of a headache. Here
 
 ## Other Interesting Plugins to Check
 
-- https://github.com/sslivkoff/vim-scroll-barnacle
 - https://github.com/folke/trouble.nvim
 - https://github.com/tpope/vim-fugitive
 - https://github.com/f-person/git-blame.nvim

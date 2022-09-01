@@ -47,6 +47,9 @@ keymap("n", "<C-p>", "<cmd>Telescope find_files<cr>", opts)
 -- keymap("n", "<c-t>", "<cmd>Telescope live_grep<cr>", opts)
 keymap("n", "<C-f>", "<cmd>Telescope live_grep<cr>", opts)
 
+-- Select All
+keymap("n", "<C-a>", "ggVG", opts)
+
 -- Insert --
 -- Press jk fast to enter
 -- keymap("i", "jk", "<ESC>", opts)
@@ -75,3 +78,5 @@ keymap("t", "<C-j>", "<C-\\><C-N><C-w>j", term_opts)
 keymap("t", "<C-k>", "<C-\\><C-N><C-w>k", term_opts)
 keymap("t", "<C-l>", "<C-\\><C-N><C-w>l", term_opts)
 
+-- keymap("n", "<leader>i", ":tabnew ~\\AppData\\Local\\nvim<CR>", opts)
+-- keymap("n", "<leader>i", ":!wt.exe nvim.exe ~\\AppData\\Local\\nvim<CR>", opts)
