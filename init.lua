@@ -1,5 +1,4 @@
 -- pcall(require, "impatient")
-
 require "user.options"
 require "user.keymaps"
 require "user.plugins"
@@ -11,4 +10,4 @@ require "user.treesitter"
 require "user.lualine"
 require "user.bufferline"
 require "user.scrollbar"
-
+require "user.autopairs"
