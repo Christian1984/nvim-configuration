@@ -50,6 +50,10 @@ keymap("n", "<C-f>", "<cmd>Telescope live_grep<cr>", opts)
 -- Select All
 keymap("n", "<C-a>", "ggVG", opts)
 
+-- Set Indent Depth
+keymap("n", "<leader>i2", ":set shiftwidth=2<CR>:set tabstop=2<CR>", opts)
+keymap("n", "<leader>i4", ":set shiftwidth=4<CR>:set tabstop=4<CR>", opts)
+
 -- Insert --
 -- Press jk fast to enter
 -- keymap("i", "jk", "<ESC>", opts)
