@@ -39,7 +39,7 @@ local options = {
     scrolloff = 8,                           -- is one of my fav
     sidescrolloff = 8,
     guifont = "monospace:h11",               -- the font used in graphical neovim applications
-    fileformat = "mac",
+    -- fileformat = "mac",
     listchars = "tab: ,lead:·,trail:·,extends:>,precedes:<", --,space:·",
     list = true,
 }
