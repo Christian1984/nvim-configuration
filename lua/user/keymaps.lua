@@ -23,13 +23,14 @@ keymap("n", "<C-j>", "<C-w>j", opts)
 keymap("n", "<C-k>", "<C-w>k", opts)
 keymap("n", "<C-l>", "<C-w>l", opts)
 
-keymap("n", "<leader>e", ":Lex 25<CR>", opts)
-
 -- Resize with arrows
 keymap("n", "<A-Up>", ":resize +2<CR>", opts)
 keymap("n", "<A-Down>", ":resize -2<CR>", opts)
 keymap("n", "<A-Left>", ":vertical resize -2<CR>", opts)
 keymap("n", "<A-Right>", ":vertical resize +2<CR>", opts)
+
+-- nvim-tree
+keymap("n", "<leader>e", ":NvimTreeToggle<CR>", opts)
 
 -- Navigate buffers
 keymap("n", "<leader>l", ":bnext<CR>", opts)     -- changed to <leader>* to keept default <S-*> behaviour
@@ -53,6 +54,15 @@ keymap("n", "<C-a>", "ggVG", opts)
 -- Set Indent Depth
 keymap("n", "<leader>i2", ":set shiftwidth=2<CR>:set tabstop=2<CR>", opts)
 keymap("n", "<leader>i4", ":set shiftwidth=4<CR>:set tabstop=4<CR>", opts)
+
+-- nohl
+keymap("n", "<leader>s", ":nohl<CR>", opts)
+
+-- close buffer
+keymap("n", "<leader>q", ":bd<CR>", opts)
+
+-- git
+keymap("n", "<leader>gb", ":Gitsigns toggle_current_line_blame<CR>", opts)
 
 -- Insert --
 -- Press jk fast to enter

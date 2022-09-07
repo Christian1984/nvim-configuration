@@ -44,6 +44,8 @@ or
 
 ## Important Bindings
 
+- `<C-a>`: Select All
+
 - `<C-p>`: find files
 - `<C-f>`: find in, i.e. live-grep
 
@@ -54,15 +56,27 @@ or
 
 - `gd`: goto definitions
 - `gr`: go to references
+- `gn`: rename symbol
 - `K`: hover and get information about symbol (vs. `<C-k>`, check `handlers.lua`)
+
+- `gcc` / `gc`: comment (line mode)
+- `gbc` / `gb`: comment (block mode)
+
+- `<leader>s`: remove search highlighting
+- `<leader>q`: close buffer
+- `<leader>i2` / `<leader>i4`: set indentation depth
+- `<leader>gb`: toggle git blame
 
 ## Important Commands
 
-`LspInstallInfo`: install lsp servers
-`LspInfo`: see currently attached lsp servers
+- `TSUpdate`: Update all plugins
+- `LspInstallInfo`: install lsp servers
+- `LspInfo`: see currently attached lsp servers
 
 ## Other Interesting Plugins to Check
 
+- https://github.com/sslivkoff/vim-scroll-barnacle
 - https://github.com/folke/trouble.nvim
 - https://github.com/tpope/vim-fugitive
 - https://github.com/f-person/git-blame.nvim
+- nvim-telescope/telescope-file-browser.nvim

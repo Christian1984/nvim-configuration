@@ -1,4 +1,5 @@
 -- pcall(require, "impatient")
+
 require "user.options"
 require "user.keymaps"
 require "user.plugins"
@@ -11,3 +12,6 @@ require "user.lualine"
 require "user.bufferline"
 require "user.scrollbar"
 require "user.autopairs"
+require "user.comment"
+require "user.gitsigns"
+require "user.nvim-tree"
