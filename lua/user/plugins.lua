@@ -47,6 +47,7 @@ return packer.startup(function(use)
   use "windwp/nvim-autopairs" -- Autopairs, integrates with both cmp and treesitter
   use "numToStr/Comment.nvim" -- Easily comment stuff
   use {"kyazdani42/nvim-tree.lua", requires = { "kyazdani42/nvim-web-devicons", opt = true}}
+  use "lukas-reineke/indent-blankline.nvim" -- indentation guide lines
 
   -- Startup
   use "lewis6991/impatient.nvim"
