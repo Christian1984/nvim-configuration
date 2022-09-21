@@ -1,5 +1,6 @@
 local status_ok, configs = pcall(require, "nvim-treesitter.configs")
 if not status_ok then
+    vim.notify("nvim-treesitter.configs not found")
     return
 end
 
@@ -12,7 +13,7 @@ configs.setup {
   },
   highlight = {
     enable = true, -- false will disable the whole extension
-    disable = { "" }, -- list of language that will be disabled
+    disable = { "html" }, -- list of language that will be disabled
     -- additional_vim_regex_highlighting = true,
   },
   indent = { enable = true, disable = { "yaml" } },
@@ -25,4 +26,14 @@ configs.setup {
     extended_mode = true,
     max_file_lines = nil,
   }
+}
+
+local status_ok, install = pcall(require, "nvim-treesitter.install")
+if not status_ok then
+    vim.notify("nvim-treesitter.install not found")
+    return
+end
+
+install.compilers = {
+    "clang"
 }

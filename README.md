@@ -27,6 +27,8 @@ Install [ripgrep](https://github.com/BurntSushi/ripgrep) to have .gitignore resp
 
 ## TreeSitter and Windows
 
+Below did not work well after all. Install and configure LLVM as described here: https://github.com/nvim-treesitter/nvim-treesitter/wiki/Windows-support#troubleshooting
+
 Installing nvim-treesitter under Windows gave me quite a bit of a headache. Here's what worked for me:
 
 - Install MinGW-x64 and add the `bin/` to PATH
