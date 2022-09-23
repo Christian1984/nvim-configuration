@@ -59,7 +59,7 @@ keymap("n", "<leader>i4", ":set shiftwidth=4<CR>:set tabstop=4<CR>", opts)
 keymap("n", "<leader>s", ":nohl<CR>", opts)
 
 -- close buffer
-keymap("n", "<leader>q", ":bd<CR>", opts)
+keymap("n", "<leader>x", ":bw<CR>", opts)
 
 -- git
 keymap("n", "<leader>gb", ":Gitsigns toggle_current_line_blame<CR>", opts)
