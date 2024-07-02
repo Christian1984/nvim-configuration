@@ -1,10 +1,13 @@
 -- pcall(require, "impatient")
 
+require "user.packer"
+
 if vim.g.vscode then
     require "user.vscode.options"
     require "user.vscode.keymaps"
 else
     require "user.keymaps"
+    require "user.packer"
     require "user.plugins"
     require "user.colorscheme"
     require "user.cmp"
