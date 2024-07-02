@@ -47,6 +47,7 @@ keymap("v", "<", "<gv", opts)
 keymap("v", ">", ">gv", opts)
 
 -- toogle commentes
-keymap("v", "gc", ":call VSCodeCall('editor.action.commentLine')<CR>", opts)
+-- keymap("v", "gc", ":call VSCodeCall('editor.action.commentLine')<CR>", opts)
+keymap("v", "gc", "<C-/>", opts)
 -- keymap("v", "gc", ":call g:ToggleComment()<CR>", opts)
 -- keymap("v", "gb", ":call VSCodeCall('editor.action.blockComment')<CR>", opts)
