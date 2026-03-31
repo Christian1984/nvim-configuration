@@ -5,9 +5,10 @@ if not status_ok then
 end
 
 configs.setup {
-  ensure_installed = "all",
+  ensure_installed = { "lua", "python", "javascript", "typescript", "json", "yaml", "markdown", "bash", "vim" },
   sync_install = false,
-  ignore_install = { "" }, -- List of parsers to ignore installing
+  auto_install = true, -- Auto-install parsers when opening files
+  ignore_install = { "ipkg" }, -- Ignore broken parsers
   autopairs = {
     enable = true,
   },

@@ -39,7 +39,7 @@ return packer.startup(function(use)
 
   -- Startup
   use "lewis6991/impatient.nvim"
-  use "nathom/filetype.nvim"
+  -- use "nathom/filetype.nvim" -- No longer needed, Neovim has built-in filetype detection
 
   -- Colorschemes
   use "lunarvim/colorschemes" -- A bunch of colorschemes you can try out
@@ -61,7 +61,8 @@ return packer.startup(function(use)
 
   -- LSP
   use "neovim/nvim-lspconfig" -- enable LSP
-  use "williamboman/nvim-lsp-installer" -- simple to use language server installer
+  use "williamboman/mason.nvim" -- LSP/DAP/Linter installer
+  use "williamboman/mason-lspconfig.nvim" -- bridge between mason and lspconfig
 
   -- Telescope
   use "nvim-telescope/telescope.nvim"
@@ -78,7 +79,7 @@ return packer.startup(function(use)
   -- Dashboard, Lualine, Bufferline
   -- use("glepnir/dashboard-nvim")
   use {"nvim-lualine/lualine.nvim", requires = { "kyazdani42/nvim-web-devicons", opt = true}}
-  use {"akinsho/bufferline.nvim", tag = "v2.*", requires = "kyazdani42/nvim-web-devicons"}
+  use {"akinsho/bufferline.nvim", tag = "v4.*", requires = "nvim-tree/nvim-web-devicons"}
 
   use("petertriho/nvim-scrollbar")
 
