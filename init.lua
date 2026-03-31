@@ -1,14 +1,14 @@
 -- pcall(require, "impatient")
 
-require "user.packer"
-
 if vim.g.vscode then
+    -- VSCode Neovim integration
     require "user.vscode.options"
     require "user.vscode.keymaps"
 else
-    require "user.keymaps"
+    -- Regular Neovim
     require "user.packer"
     require "user.plugins"
+    require "user.keymaps"
     require "user.colorscheme"
     require "user.cmp"
     require "user.lsp"
