@@ -69,7 +69,7 @@ return packer.startup(function(use)
 
   -- Treesitter
   use {"nvim-treesitter/nvim-treesitter", run = ":TSUpdate"}
-  use "p00f/nvim-ts-rainbow"
+  -- use "p00f/nvim-ts-rainbow" -- Disabled: can cause compatibility issues
   -- use "nvim-treesitter/playground"
   use "JoosepAlviste/nvim-ts-context-commentstring"
 
