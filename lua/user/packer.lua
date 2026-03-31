@@ -1,3 +1,8 @@
+-- Guard against loading in VSCode
+if vim.g.vscode then
+  return
+end
+
 local fn = vim.fn
 
 -- Automatically install packer

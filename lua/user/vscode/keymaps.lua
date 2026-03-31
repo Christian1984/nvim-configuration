@@ -17,8 +17,8 @@ keymap("", "<C-v>", "<Nop>", opts)
 
 -- Normal Mode
 -- Navigate Tabs with, um, Tab
-keymap("n", "<Tab>", ":Tabnext<CR>", opts)
-keymap("n", "<S-Tab>", ":Tabprev<CR>", opts)
+keymap("n", "<leader><Tab>", ":Tabnext<CR>", opts)
+keymap("n", "<leader><S-Tab>", ":Tabprev<CR>", opts)
 
 -- Better Window Navigation
 -- keymap("n", "<C-p>", ":call VSCodeCall('workbench.action.quickOpen')<CR>", opts)
