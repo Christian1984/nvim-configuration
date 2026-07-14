@@ -1,7 +1,15 @@
 -- pcall(require, "impatient")
 
+-- Disable the python3 remote-plugin provider. Not used here, and on Neovim
+-- 0.12 the bundled python ftplugin errors when g:loaded_python3_provider is
+-- unset. (Treesitter/LSP for Python are unaffected by this.)
+vim.g.loaded_python3_provider = 0
+
 if vim.g.vscode then
-    -- VSCode Neovim integration
+    -- VSCode Neovim integration: don't auto-load packer start plugins /
+    -- packer_compiled.lua; VSCode owns UI, LSP, git, commenting, etc.
+    vim.opt.loadplugins = false
+
     require "user.vscode.options"
     require "user.vscode.keymaps"
 else

@@ -10,51 +10,28 @@ mason.setup({
 	},
 })
 
--- Setup mason-lspconfig
+-- mason-lspconfig v2 removed setup_handlers(). Installed servers are now
+-- enabled automatically via vim.lsp.enable() (automatic_enable = true), and
+-- per-server settings are supplied through Neovim's native vim.lsp.config().
 local status_ok_ml, mason_lspconfig = pcall(require, "mason-lspconfig")
 if not status_ok_ml then
 	return
 end
 
-mason_lspconfig.setup({
-	ensure_installed = { "lua_ls", "jsonls", "pyright" },
-	automatic_installation = true,
-})
-
--- Setup handlers for each server
-local lspconfig = require("lspconfig")
 local handlers = require("user.lsp.handlers")
 
-mason_lspconfig.setup_handlers({
-	-- Default handler for all servers
-	function(server_name)
-		local opts = {
-			on_attach = handlers.on_attach,
-			capabilities = handlers.capabilities,
-		}
-		lspconfig[server_name].setup(opts)
-	end,
-	
-	-- Specific server configurations
-	["lua_ls"] = function()
-		local opts = require("user.lsp.settings.lua_ls")
-		opts.on_attach = handlers.on_attach
-		opts.capabilities = handlers.capabilities
-		lspconfig.lua_ls.setup(opts)
-	end,
-	
-	["jsonls"] = function()
-		local opts = require("user.lsp.settings.jsonls")
-		opts.on_attach = handlers.on_attach
-		opts.capabilities = handlers.capabilities
-		lspconfig.jsonls.setup(opts)
-	end,
-	
-	["pyright"] = function()
-		local opts = require("user.lsp.settings.pyright")
-		opts.on_attach = handlers.on_attach
-		opts.capabilities = handlers.capabilities
-		lspconfig.pyright.setup(opts)
-	end,
+-- Defaults applied to every server (merged under each server's own config).
+vim.lsp.config("*", {
+	on_attach = handlers.on_attach,
+	capabilities = handlers.capabilities,
 })
 
+-- Per-server overrides, merged on top of nvim-lspconfig's base lsp/<name>.lua.
+vim.lsp.config("lua_ls", require("user.lsp.settings.lua_ls"))
+vim.lsp.config("jsonls", require("user.lsp.settings.jsonls"))
+vim.lsp.config("pyright", require("user.lsp.settings.pyright"))
+
+mason_lspconfig.setup({
+	ensure_installed = { "lua_ls", "jsonls", "pyright" },
+	automatic_enable = true,
+})

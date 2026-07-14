@@ -1,47 +1,56 @@
--- Skip deprecated ts_context_commentstring module
-vim.g.skip_ts_context_commentstring_module = true
-
-local status_ok, configs = pcall(require, "nvim-treesitter.configs")
+-- nvim-treesitter `main` branch (required for Neovim 0.12+).
+-- The old module system (require("nvim-treesitter.configs").setup{...}) no
+-- longer exists: parsers are installed via install(), and highlighting/indent
+-- are enabled per buffer through Neovim's built-in treesitter.
+local status_ok, ts = pcall(require, "nvim-treesitter")
 if not status_ok then
-    vim.notify("nvim-treesitter.configs not found")
-    return
+  vim.notify("nvim-treesitter not found")
+  return
 end
 
-configs.setup {
-  ensure_installed = { "lua", "python", "javascript", "typescript", "json", "yaml", "markdown", "bash", "vim" },
-  sync_install = false,
-  auto_install = true, -- Auto-install parsers when opening files
-  ignore_install = { "ipkg" }, -- Ignore broken parsers
-  autopairs = {
-    enable = true,
-  },
-  highlight = {
-    enable = true,
-    disable = function(lang, buf)
-      -- Disable for very large files
-      local max_filesize = 100 * 1024 -- 100 KB
-      local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
-      if ok and stats and stats.size > max_filesize then
-        return true
-      end
-    end,
-    additional_vim_regex_highlighting = false,
-  },
-  indent = { enable = true, disable = { "yaml" } },
-  -- Disable rainbow - it can cause issues with newer treesitter
-  -- rainbow = {
-  --   enable = true,
-  --   extended_mode = true,
-  --   max_file_lines = nil,
-  -- }
+-- Parsers to keep installed. `markdown_inline` is needed for fenced code
+-- blocks; `vimdoc`/`query` are handy for help files and query editing.
+local ensure = {
+  "lua", "python", "javascript", "typescript", "tsx",
+  "json", "yaml", "markdown", "markdown_inline",
+  "bash", "vim", "vimdoc", "query",
 }
 
-local status_ok, install = pcall(require, "nvim-treesitter.install")
-if not status_ok then
-    vim.notify("nvim-treesitter.install not found")
-    return
-end
+-- Defaults are fine; call setup() only to be explicit about the install dir.
+ts.setup {}
 
-install.compilers = {
-    "clang"
-}
+-- Install any missing parsers (async; a no-op if already present).
+pcall(ts.install, ensure)
+
+-- Don't enable treesitter for very large files.
+local max_filesize = 100 * 1024 -- 100 KB
+
+-- Indentation is experimental on the main branch; disabled for yaml, matching
+-- the previous config.
+local no_indent = { yaml = true }
+
+vim.api.nvim_create_autocmd("FileType", {
+  group = vim.api.nvim_create_augroup("user_treesitter", { clear = true }),
+  callback = function(args)
+    local buf = args.buf
+
+    local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+    if ok and stats and stats.size > max_filesize then
+      return
+    end
+
+    local lang = vim.treesitter.language.get_lang(vim.bo[buf].filetype)
+    if not lang then
+      return
+    end
+
+    -- Only start if a parser is actually available for this language.
+    if not pcall(vim.treesitter.start, buf, lang) then
+      return
+    end
+
+    if not no_indent[vim.bo[buf].filetype] then
+      vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+    end
+  end,
+})

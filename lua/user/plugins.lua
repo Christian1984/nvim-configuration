@@ -68,7 +68,7 @@ return packer.startup(function(use)
   use "nvim-telescope/telescope.nvim"
 
   -- Treesitter
-  use {"nvim-treesitter/nvim-treesitter", run = ":TSUpdate"}
+  use {"nvim-treesitter/nvim-treesitter", branch = "main", run = ":TSUpdate"}
   -- use "p00f/nvim-ts-rainbow" -- Disabled: can cause compatibility issues
   -- use "nvim-treesitter/playground"
   use "JoosepAlviste/nvim-ts-context-commentstring"
