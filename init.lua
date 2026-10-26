@@ -32,6 +32,7 @@ else
     require "user.indent-blankline"
     require "user.diffview"
     vim.g.claude_explain_language = "Deutsch" -- language of <leader>e explanations
+    vim.g.claude_explain_model = nil             -- e.g. "sonnet" or "haiku"; nil = Claude Code default
     require "user.claude"
 end
 

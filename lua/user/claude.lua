@@ -1,6 +1,7 @@
 local M = {}
 
--- Language of the explanation. Override in init.lua before this module is required.
+-- Language of the explanation and the model to use (nil = Claude Code's configured default).
+-- Override both in init.lua before this module is required.
 vim.g.claude_explain_language = vim.g.claude_explain_language or "English"
 
 local function git(args)
@@ -24,26 +25,32 @@ local function ask(prompt, on_done)
   local file = dir .. "/" .. ticket
   local existing = vim.fn.filereadable(file) == 1 and vim.trim(table.concat(vim.fn.readfile(file), "")) or nil
 
+  local function claude(args)
+    local cmd = { "claude", "-p" }
+    if vim.g.claude_explain_model then vim.list_extend(cmd, { "--model", vim.g.claude_explain_model }) end
+    return vim.list_extend(vim.list_extend(cmd, args), { prompt })
+  end
+
   local function start_fresh()
     local id = vim.trim(vim.fn.system("uuidgen")):lower()
     vim.fn.writefile({ id }, file)
-    vim.system({ "claude", "-p", "--session-id", id, "--name", ticket .. ": code explainer", prompt },
-      { text = true }, on_done)
+    vim.system(claude({ "--session-id", id, "--name", ticket .. ": code explainer" }), { text = true }, on_done)
   end
 
   if not existing then return start_fresh() end
-  vim.system({ "claude", "-p", "--resume", existing, prompt }, { text = true }, function(result)
-    -- a stale id (session pruned or started in another directory) cannot be resumed: start over
-    if result.code ~= 0 then
+  vim.system(claude({ "--resume", existing }), { text = true }, vim.schedule_wrap(function(result)
+    -- only a stale id (session pruned or started elsewhere) justifies a new session; any other
+    -- failure, such as being logged out, keeps the id so the dialog continues once it is fixed
+    if result.code ~= 0 and (result.stderr .. result.stdout):find("No conversation found", 1, true) then
       vim.fn.delete(file)
       return start_fresh()
     end
     on_done(result)
-  end)
+  end))
 end
 
 -- Where the current buffer sits in the repository and which diff it is part of: inside Diffview
--- the view's own revision range for the current file, elsewhere the working tree against HEAD.
+-- the view's own revision range for the current file, elsewhere the branch against main.
 local function current_location()
   local ok, lib = pcall(require, "diffview.lib")
   local view = ok and lib.get_current_view() or nil
@@ -63,8 +70,14 @@ local function current_location()
   local _, root = ticket_and_root()
   local path = vim.fn.expand("%:p")
   local relative = vim.startswith(path, root .. "/") and path:sub(#root + 2) or path
+  -- the branch's whole change so far, committed or not; on main itself that is the working tree
+  local base = git({ "merge-base", "main", "HEAD" })
+  if base then
+    return relative, git({ "diff", base, "--", path }) or "", "main...working tree"
+  end
   return relative, git({ "diff", "HEAD", "--", path }) or "", "working tree vs HEAD"
 end
+M.current_location = current_location
 
 -- The dialog lives in .scratch/<ticket>/code-explain.md (lowercase slug, like the team's PRD
 -- folders) and is shown in one window on the right.
@@ -103,11 +116,15 @@ local function converse(heading, prompt)
   append(buf, { heading, "", placeholder, "" })
   ask(prompt, vim.schedule_wrap(function(result)
     if not vim.api.nvim_buf_is_valid(buf) then return end
-    local text = result.stdout ~= "" and result.stdout or result.stderr
+    local text = vim.trim(result.stdout ~= "" and result.stdout or result.stderr)
+    if result.code ~= 0 then
+      text = string.format("**Fehler (claude exit %d):** %s", result.code, text ~= "" and text or "keine Ausgabe")
+      vim.notify("Claude: " .. text, vim.log.levels.ERROR)
+    end
     local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
     for i = #lines, 1, -1 do
       if lines[i] == placeholder then
-        vim.api.nvim_buf_set_lines(buf, i - 1, i, false, vim.split(vim.trim(text), "\n"))
+        vim.api.nvim_buf_set_lines(buf, i - 1, i, false, vim.split(text, "\n"))
         break
       end
     end
@@ -121,9 +138,11 @@ function M.explain_selection()
   local path, diff, range = current_location()
   local location = string.format("%s:%d-%d", path, first, last)
   local parts = {
-    string.format("Explain the selected section of %s. Cover what the code does and, using the diff, why it "
-      .. "changed: what is new or removed, and what purpose a newly introduced helper, parameter or type serves. "
-      .. "Be concise, plain prose, no heading. Answer in %s.", location, vim.g.claude_explain_language),
+    string.format("Explain the selected section of %s in exactly two sections, each under a level-3 markdown "
+      .. "heading. First heading: 'What it does', covering what the code does. Second heading: 'What changed and "
+      .. "why', using the diff: what is new or removed, and what purpose a newly introduced helper, parameter or "
+      .. "type serves; if the file has no diff, say so in one sentence. Translate both headings into the answer "
+      .. "language. Be concise, plain prose. Answer in %s.", location, vim.g.claude_explain_language),
     "Selected lines:\n```\n" .. code .. "\n```",
     diff ~= "" and string.format("Diff of %s (%s):\n```diff\n%s\n```", path, range, diff)
       or "There is no diff for this file; explain the code on its own.",
