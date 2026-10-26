@@ -16,6 +16,16 @@ local function ticket_and_root()
   return branch:match("%u+%-%d+") or vim.fs.basename(root), root
 end
 
+-- The branch a feature branch is compared against: the remote's default branch, else main/master.
+function M.base_branch()
+  local head = git({ "symbolic-ref", "--short", "refs/remotes/origin/HEAD" })
+  if head then return (head:gsub("^origin/", "")) end
+  for _, name in ipairs({ "main", "master" }) do
+    if git({ "rev-parse", "--verify", "--quiet", "refs/heads/" .. name }) then return name end
+  end
+  return nil
+end
+
 -- One Claude session per ticket, named "<ticket>: code explainer". The session id is kept under
 -- the nvim state dir so later calls can resume it.
 local function ask(prompt, on_done)
@@ -50,7 +60,7 @@ local function ask(prompt, on_done)
 end
 
 -- Where the current buffer sits in the repository and which diff it is part of: inside Diffview
--- the view's own revision range for the current file, elsewhere the branch against main.
+-- the view's own revision range for the current file, elsewhere the branch against its base branch.
 local function current_location()
   local ok, lib = pcall(require, "diffview.lib")
   local view = ok and lib.get_current_view() or nil
@@ -70,10 +80,11 @@ local function current_location()
   local _, root = ticket_and_root()
   local path = vim.fn.expand("%:p")
   local relative = vim.startswith(path, root .. "/") and path:sub(#root + 2) or path
-  -- the branch's whole change so far, committed or not; on main itself that is the working tree
-  local base = git({ "merge-base", "main", "HEAD" })
+  -- the branch's whole change so far, committed or not; on the base branch itself that is the working tree
+  local base_branch = M.base_branch()
+  local base = base_branch and git({ "merge-base", base_branch, "HEAD" })
   if base then
-    return relative, git({ "diff", base, "--", path }) or "", "main...working tree"
+    return relative, git({ "diff", base, "--", path }) or "", base_branch .. "...working tree"
   end
   return relative, git({ "diff", "HEAD", "--", path }) or "", "working tree vs HEAD"
 end
@@ -98,36 +109,37 @@ local function dialog_buffer()
   return buf
 end
 
-local function append(buf, lines)
-  local last = vim.api.nvim_buf_line_count(buf)
-  local empty = last == 1 and vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] == ""
-  vim.api.nvim_buf_set_lines(buf, empty and 0 or last, -1, false, lines)
-  vim.api.nvim_buf_call(buf, function()
-    vim.cmd("silent write")
-    vim.cmd("normal! G")
-  end)
-  return vim.api.nvim_buf_line_count(buf)
-end
+local namespace = vim.api.nvim_create_namespace("claude-explain")
 
--- Appends a heading and a placeholder, asks Claude, then swaps the placeholder for the answer.
+-- Appends a heading and a placeholder, asks Claude, then swaps the placeholder for the answer and
+-- writes the file. On an error the pending block is removed again: the file only ever holds answers.
 local function converse(heading, prompt)
   local buf = dialog_buffer()
-  local placeholder = "_Claude antwortet…_"
-  append(buf, { heading, "", placeholder, "" })
+  local last = vim.api.nvim_buf_line_count(buf)
+  local empty = last == 1 and vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] == ""
+  local start = empty and 0 or last
+  vim.api.nvim_buf_set_lines(buf, start, -1, false, { heading, "", "_Claude antwortet…_", "" })
+  -- extmarks follow the block even if the user edits above it while waiting
+  local from = vim.api.nvim_buf_set_extmark(buf, namespace, start, 0, {})
+  local to = vim.api.nvim_buf_set_extmark(buf, namespace, start + 3, 0, {})
+  vim.api.nvim_buf_call(buf, function() vim.cmd("normal! G") end)
+
   ask(prompt, vim.schedule_wrap(function(result)
     if not vim.api.nvim_buf_is_valid(buf) then return end
+    local first = vim.api.nvim_buf_get_extmark_by_id(buf, namespace, from, {})[1]
+    local after = vim.api.nvim_buf_get_extmark_by_id(buf, namespace, to, {})[1] + 1
+    vim.api.nvim_buf_clear_namespace(buf, namespace, 0, -1)
     local text = vim.trim(result.stdout ~= "" and result.stdout or result.stderr)
     if result.code ~= 0 then
-      text = string.format("**Fehler (claude exit %d):** %s", result.code, text ~= "" and text or "keine Ausgabe")
-      vim.notify("Claude: " .. text, vim.log.levels.ERROR)
+      vim.api.nvim_buf_set_lines(buf, first, after, false, {})
+      local on_disk = vim.fn.filereadable(vim.api.nvim_buf_get_name(buf)) == 1
+        and vim.fn.readfile(vim.api.nvim_buf_get_name(buf)) or {}
+      if vim.deep_equal(vim.api.nvim_buf_get_lines(buf, 0, -1, false), on_disk) then vim.bo[buf].modified = false end
+      vim.notify(string.format("Claude (exit %d): %s", result.code, text ~= "" and text or "keine Ausgabe"),
+        vim.log.levels.ERROR)
+      return
     end
-    local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-    for i = #lines, 1, -1 do
-      if lines[i] == placeholder then
-        vim.api.nvim_buf_set_lines(buf, i - 1, i, false, vim.split(text, "\n"))
-        break
-      end
-    end
+    vim.api.nvim_buf_set_lines(buf, first + 2, first + 3, false, vim.split(text, "\n"))
     vim.api.nvim_buf_call(buf, function() vim.cmd("silent write") end)
   end))
 end

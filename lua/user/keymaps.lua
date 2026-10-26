@@ -63,7 +63,10 @@ keymap("n", "<leader>x", ":bw<CR>", opts)
 
 -- git
 keymap("n", "<leader>gb", ":Gitsigns toggle_current_line_blame<CR>", opts)
-keymap("n", "<leader>gd", ":DiffviewOpen main...HEAD<CR>", opts) -- branch against its merge base with main
+vim.keymap.set("n", "<leader>gd", function() -- branch against its merge base with the default branch
+  local base = require("user.claude").base_branch()
+  vim.cmd("DiffviewOpen " .. (base and base .. "...HEAD" or ""))
+end, { desc = "Diffview: branch vs base branch" })
 keymap("n", "<leader>gq", ":DiffviewClose<CR>", opts)
 
 -- Insert --
