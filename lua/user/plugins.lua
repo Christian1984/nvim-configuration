@@ -76,6 +76,7 @@ return packer.startup(function(use)
   -- Git
   use "lewis6991/gitsigns.nvim"
   use "sindrets/diffview.nvim" -- browse branch/commit diffs
+  use "Christian1984/claude-diff-explainer.nvim" -- explain selection + diff with claude -p
 
   -- Dashboard, Lualine, Bufferline
   -- use("glepnir/dashboard-nvim")
