@@ -1,4 +1,8 @@
-require("claude-diff-explainer").setup({
+-- not yet cloned on a fresh machine until the first :PackerSync
+local ok, explainer = pcall(require, "claude-diff-explainer")
+if not ok then return end
+
+explainer.setup({
   language = "Deutsch",
   model = nil, -- e.g. "sonnet" or "haiku"; nil = Claude Code default
   -- the dialog lives next to the ticket's PRD and issues, lowercase slug like those folders
