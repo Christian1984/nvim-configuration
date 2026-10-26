@@ -1,5 +1,8 @@
 local M = {}
 
+-- Language of the explanation. Override in init.lua before this module is required.
+vim.g.claude_explain_language = vim.g.claude_explain_language or "English"
+
 local function git(args)
   local result = vim.system(vim.list_extend({ "git" }, args), { text = true }):wait()
   return result.code == 0 and vim.trim(result.stdout) or nil
@@ -39,12 +42,47 @@ local function ask(prompt, on_done)
   end)
 end
 
-function M.explain_selection()
-  local first, last = vim.fn.line("'<"), vim.fn.line("'>")
+-- The diff the current buffer is part of: inside Diffview the view's own revision range for the
+-- current file, elsewhere the working tree against HEAD. Returns the diff and a label for it.
+local function current_diff()
+  local ok, lib = pcall(require, "diffview.lib")
+  local view = ok and lib.get_current_view() or nil
+  if view and view.cur_entry and view.left then
+    local RevType = require("diffview.vcs.rev").RevType
+    local path = view.cur_entry.path
+    local args = { "diff", view.left:object_name() }
+    if view.right.type == RevType.STAGE then
+      table.insert(args, "--cached")
+    elseif view.right.type ~= RevType.LOCAL then
+      table.insert(args, view.right:object_name())
+    end
+    vim.list_extend(args, { "--", path })
+    return git(args) or "", view.rev_arg or (view.left:object_name(8) .. ".." .. view.right:object_name(8))
+  end
+  local path = vim.fn.expand("%:p")
+  return git({ "diff", "HEAD", "--", path }) or "", "working tree vs HEAD"
+end
+
+function M.build_prompt(first, last)
   local code = table.concat(vim.api.nvim_buf_get_lines(0, first - 1, last, false), "\n")
-  local prompt = string.format(
-    "Explain what this section of %s does. Be concise, use plain prose.\n\n```\n%s\n```",
-    vim.fn.expand("%:t"), code)
+  local diff, range = current_diff()
+  local file = vim.fn.expand("%:t")
+  local parts = {
+    string.format("Explain the selected section of %s. Cover what the code does and, using the diff, why it "
+      .. "changed: what is new or removed, and what purpose a newly introduced helper, parameter or type serves. "
+      .. "Be concise, plain prose. Answer in %s.", file, vim.g.claude_explain_language),
+    "Selected lines:\n```\n" .. code .. "\n```",
+  }
+  if diff ~= "" then
+    table.insert(parts, string.format("Diff of %s (%s):\n```diff\n%s\n```", file, range, diff))
+  else
+    table.insert(parts, "There is no diff for this file; explain the code on its own.")
+  end
+  return table.concat(parts, "\n\n")
+end
+
+function M.explain_selection()
+  local prompt = M.build_prompt(vim.fn.line("'<"), vim.fn.line("'>"))
 
   vim.cmd("botright vnew")
   local buf = vim.api.nvim_get_current_buf()

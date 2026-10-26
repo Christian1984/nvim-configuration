@@ -30,6 +30,8 @@ else
     require "user.gitsigns"
     require "user.nvim-tree"
     require "user.indent-blankline"
+    require "user.diffview"
+    vim.g.claude_explain_language = "English" -- language of <leader>e explanations
     require "user.claude"
 end
 
