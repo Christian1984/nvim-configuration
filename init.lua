@@ -30,6 +30,7 @@ else
     require "user.gitsigns"
     require "user.nvim-tree"
     require "user.indent-blankline"
+    require "user.claude"
 end
 
 
