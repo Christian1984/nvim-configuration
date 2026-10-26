@@ -34,6 +34,7 @@ keymap("n", "gcc", ":call VSCodeCall('editor.action.commentLine')<CR>", opts)
 -- rename, goto definition
 keymap("n", "gn", ":call VSCodeCall('editor.action.rename')<CR>", opts)
 keymap("n", "gd", ":call VSCodeCall('editor.action.revealDefinition')<CR>", opts)
+keymap("n", "gi", ":call VSCodeCall('editor.action.referenceSearch.trigger')<CR>", opts)
 keymap("n", "gh", ":call VSCodeCall('editor.action.showHover')<CR>", opts)
 keymap("n", "gl", ":call VSCodeCall('editor.action.showHover')<CR>", opts)
 
