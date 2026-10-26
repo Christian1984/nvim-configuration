@@ -1,5 +1,44 @@
 local M = {}
 
+local function git(args)
+  local result = vim.system(vim.list_extend({ "git" }, args), { text = true }):wait()
+  return result.code == 0 and vim.trim(result.stdout) or nil
+end
+
+-- One Claude session per ticket, named "<ticket>: code explainer". The ticket comes from the
+-- branch name (EM-1234); without one, the repository name stands in. The session id is kept
+-- under the nvim state dir so later calls can resume it.
+local function session_file()
+  local branch = git({ "branch", "--show-current" }) or ""
+  local repo = vim.fs.basename(git({ "rev-parse", "--show-toplevel" }) or vim.fn.getcwd())
+  local ticket = branch:match("%u+%-%d+") or repo
+  local dir = vim.fn.stdpath("state") .. "/claude-sessions"
+  vim.fn.mkdir(dir, "p")
+  return dir .. "/" .. ticket, ticket
+end
+
+local function ask(prompt, on_done)
+  local file, ticket = session_file()
+  local existing = vim.fn.filereadable(file) == 1 and vim.trim(table.concat(vim.fn.readfile(file), "")) or nil
+
+  local function start_fresh()
+    local id = vim.trim(vim.fn.system("uuidgen")):lower()
+    vim.fn.writefile({ id }, file)
+    vim.system({ "claude", "-p", "--session-id", id, "--name", ticket .. ": code explainer", prompt },
+      { text = true }, on_done)
+  end
+
+  if not existing then return start_fresh() end
+  vim.system({ "claude", "-p", "--resume", existing, prompt }, { text = true }, function(result)
+    -- a stale id (session pruned or started in another directory) cannot be resumed: start over
+    if result.code ~= 0 then
+      vim.fn.delete(file)
+      return start_fresh()
+    end
+    on_done(result)
+  end)
+end
+
 function M.explain_selection()
   local first, last = vim.fn.line("'<"), vim.fn.line("'>")
   local code = table.concat(vim.api.nvim_buf_get_lines(0, first - 1, last, false), "\n")
@@ -13,7 +52,7 @@ function M.explain_selection()
   vim.wo.wrap = true
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "Asking Claude…" })
 
-  vim.system({ "claude", "-p", prompt }, { text = true }, vim.schedule_wrap(function(result)
+  ask(prompt, vim.schedule_wrap(function(result)
     local text = result.stdout ~= "" and result.stdout or result.stderr
     if not vim.api.nvim_buf_is_valid(buf) then return end
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(text, "\n"))
